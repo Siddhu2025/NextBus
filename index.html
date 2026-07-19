@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NextBus MMC — College Bus Timings</title>
+
+<!-- ============================================================
+     NextBus MMC
+     Mobile-first bus timetable for Mary Matha College students.
+
+     HOW THIS FILE IS ORGANISED:
+       1. CSS (styles)          — claymorphic look, colors, cards
+       2. HTML (page skeleton)  — home / route details / favorites / about
+       3. JS  (data + logic)    — ✏️ BUS TIMETABLE DATA IS AT THE TOP
+                                   OF THE <script> SECTION. That is
+                                   where you add/edit buses.
+
+     Look for comments marked with  ✏️ EDIT HERE  — those are the
+     spots designed for you to change things yourself later.
+     ============================================================ -->
+
+<style>
+  /* ==========================================================
+     1. DESIGN TOKENS
+     ✏️ EDIT HERE: change site-wide colors in one place.
+     ========================================================== */
+  :root {
+    --bg: #ffffff;              /* page background (white) */
+    --text: #1e293b;            /* main text color */
+    --text-muted: #64748b;      /* secondary/grey text */
+
+    --accent: #2563eb;          /* blue accent color */
+    --accent-soft: #eff6ff;     /* very light blue */
+
+    --ksrtc-bg: #dbeafe;        /* 🔵 KSRTC card background (blue) */
+    --ksrtc-border: #93c5fd;
+    --private-bg: #dcfce7;      /* 🟢 Private card background (green) */
+    --private-border: #86efac;
+
+    --next-border: #facc15;     /* 🟡 yellow border = next upcoming bus */
+
+    --radius: 22px;             /* rounded corner size for cards */
+
+    /* Claymorphic shadow: soft outer shadow + light inner highlight */
+    --clay-shadow:
+      0 8px 16px rgba(30, 41, 59, 0.10),
+      inset 0 -4px 8px rgba(30, 41, 59, 0.06),
+      inset 0 4px 8px rgba(255, 255, 255, 0.9);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    /* space at the bottom so content never hides behind the nav bar */
+    padding-bottom: 90px;
+    max-width: 480px;           /* keeps it phone-shaped even on desktop */
+    margin: 0 auto;
+  }
+
+  /* ==========================================================
+     2. HEADER
+     ========================================================== */
+  header {
+    padding: 24px 20px 8px;
+    text-align: center;
+  }
+  header h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+  }
+  header .updated {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ==========================================================
+     3. GENERIC CLAY CARD
+     ========================================================== */
+  .clay {
+    background: var(--bg);
+    border-radius: var(--radius);
+    box-shadow: var(--clay-shadow);
+    border: 1px solid #f1f5f9;
+  }
+
+  .page { padding: 16px 20px; }
+  .page h2 {
+    font-size: 1.15rem;
+    margin: 8px 4px 14px;
+  }
+
+  /* ==========================================================
+     4. HOME — ROUTE SELECTION CARDS
+     ========================================================== */
+  .route-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+  }
+  .route-card .arrow { color: var(--accent); font-size: 1.2rem; }
+  .route-card:active { transform: scale(0.98); }
+
+  /* ==========================================================
+     5. HOME — NEXT BUS WIDGET
+     ========================================================== */
+  .next-widget {
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 3px solid var(--next-border);
+  }
+  .next-widget .label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .next-widget .big-time {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 6px 0 2px;
+  }
+  .next-widget .detail {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .next-widget .countdown {
+    display: inline-block;
+    margin-top: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+  }
+
+  /* ==========================================================
+     6. ROUTE DETAILS — BUS TIMELINE CARDS
+     ========================================================== */
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 8px 4px;
+    font-family: inherit;
+  }
+
+  .bus-card {
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  /* 🔵 KSRTC = blue background */
+  .bus-card.ksrtc {
+    background: var(--ksrtc-bg);
+    border: 1px solid var(--ksrtc-border);
+  }
+  /* 🟢 Private = green background */
+  .bus-card.private {
+    background: var(--private-bg);
+    border: 1px solid var(--private-border);
+  }
+  /* 🟡 Yellow border = the next upcoming bus */
+  .bus-card.next {
+    border: 3px solid var(--next-border);
+  }
+
+  .bus-card .dep-time {
+    font-size: 1.5rem;
+    font-weight: 800;
+  }
+  .bus-card .bus-type {
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-top: 2px;
+  }
+  .bus-card.ksrtc  .bus-type { color: #1d4ed8; }
+  .bus-card.private .bus-type { color: #15803d; }
+
+  .bus-card .arrival {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 6px;
+  }
+  .bus-card .badge {
+    position: absolute;
+    top: -12px;
+    right: 14px;
+    background: var(--next-border);
+    color: #713f12;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+    border-radius: 999px;
+  }
+  .bus-card .departed { opacity: 0.55; }
+
+  .fav-btn {
+    width: 100%;
+    padding: 14px;
+    margin: 6px 0 18px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* ==========================================================
+     7. FAVORITES + ABOUT
+     ========================================================== */
+  .empty-msg {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 40px 20px;
+    font-size: 0.95rem;
+  }
+  .about-card {
+    padding: 28px 20px;
+    text-align: center;
+    line-height: 1.8;
+  }
+
+  /* ==========================================================
+     8. BOTTOM NAVIGATION
+     ========================================================== */
+  nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    background: var(--bg);
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -4px 12px rgba(30, 41, 59, 0.08);
+  }
+  nav button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px 0 16px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  nav button .icon { display: block; font-size: 1.3rem; margin-bottom: 2px; }
+  nav button.active { color: var(--accent); }
+
+  .hidden { display: none; }
+</style>
+</head>
+
+<body>
+
+  <!-- ==========================================================
+       HEADER
+       ========================================================== -->
+  <header>
+    <h1>🚌 College Bus Timings</h1>
+    <!-- "Last updated" = the date YOU last edited the timetable.
+         ✏️ EDIT HERE: change this text whenever you update bus data. -->
+    <div class="updated">Timetable updated: July 2026</div>
+  </header>
+
+  <!-- ==========================================================
+       PAGE: HOME
+       ========================================================== -->
+  <main id="page-home" class="page">
+    <!-- Next Bus widget — filled automatically by JavaScript -->
+    <div id="next-widget" class="clay next-widget"></div>
+
+    <h2>Select Route</h2>
+    <!-- Route cards are generated automatically from the ROUTES
+         list in the JavaScript section below. To add a new route,
+         edit the ROUTES list — no HTML change needed. -->
+    <div id="route-list"></div>
+  </main>
+
+  <!-- ==========================================================
+       PAGE: ROUTE DETAILS (shared by all 4 routes)
+       ========================================================== -->
+  <main id="page-route" class="page hidden">
+    <button class="back-btn" onclick="showPage('home')">← Back</button>
+    <h2 id="route-title"></h2>
+    <button id="fav-toggle" class="clay fav-btn"></button>
+    <!-- Bus timeline cards are generated automatically -->
+    <div id="bus-list"></div>
+  </main>
+
+  <!-- ==========================================================
+       PAGE: FAVORITES
+       ========================================================== -->
+  <main id="page-favorites" class="page hidden">
+    <h2>⭐ Favorites</h2>
+    <div id="fav-list"></div>
+  </main>
+
+  <!-- ==========================================================
+       PAGE: ABOUT
+       ✏️ EDIT HERE: change the about text / add your names below.
+       ========================================================== -->
+  <main id="page-about" class="page hidden">
+    <h2>About</h2>
+    <div class="clay about-card">
+      <p><strong>NextBus MMC</strong></p>
+      <p>Created for students of<br />
+         Mary Matha Arts &amp; Science College</p>
+      <p>Made with ❤️ by students</p>
+      <!-- ✏️ EDIT HERE: add contributor names, contact info,
+           or a feedback link. Example:
+           <p>Contact: yourname@email.com</p>
+      -->
+    </div>
+  </main>
+
+  <!-- ==========================================================
+       BOTTOM NAVIGATION
+       ========================================================== -->
+  <nav>
+    <button id="nav-home" class="active" onclick="showPage('home')">
+      <span class="icon">🏠</span>Home
+    </button>
+    <button id="nav-favorites" onclick="showPage('favorites')">
+      <span class="icon">⭐</span>Favorites
+    </button>
+    <button id="nav-about" onclick="showPage('about')">
+      <span class="icon">ℹ️</span>About
+    </button>
+  </nav>
+
+<script>
+/* ============================================================
+   ROUTES
+   ✏️ EDIT HERE: to add a new route, copy one line and change
+   the id (used internally) and the name (shown to users).
+   Buses for the route go in the BUSES list below using the
+   same route id.
+   ============================================================ */
+const ROUTES = [
+  { id: "mananthavady-college", name: "Mananthavady → College" },
+  { id: "college-mananthavady", name: "College → Mananthavady" },
+  { id: "kattikulam-college",   name: "Kattikulam → College" },
+  { id: "college-kattikulam",   name: "College → Kattikulam" },
+  // ✏️ ADD NEW ROUTES HERE, e.g.:
+  // { id: "panamaram-college", name: "Panamaram → College" },
+];
+
+/* ============================================================
+   BUS TIMETABLE  —  THE MAIN THING YOU WILL EDIT ✏️
+   ------------------------------------------------------------
+   Each bus is one line:
+     route:         must match a route id from ROUTES above
+     busType:       "KSRTC" (blue) or "Private" (green)
+     departureTime: 24-hour format "HH:MM"  (e.g. "14:30" = 2:30 PM)
+     arrivalTime:   24-hour format "HH:MM"
+     via:           the route the bus takes (shown on the card)
+
+   Buses are sorted by time automatically — you can add new
+   lines anywhere in the list, order doesn't matter.
+   ============================================================ */
+const BUSES = [
+  /* ---------- Mananthavady → College ---------- */
+  { route: "mananthavady-college", busType: "KSRTC",   departureTime: "06:45", arrivalTime: "07:30", via: "Via Dwaraka" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "07:15", arrivalTime: "08:00", via: "Via Dwaraka" },
+  { route: "mananthavady-college", busType: "KSRTC",   departureTime: "07:30", arrivalTime: "08:15", via: "Via Dwaraka" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "07:45", arrivalTime: "08:30", via: "Via Dwaraka" },
+  { route: "mananthavady-college", busType: "KSRTC",   departureTime: "08:00", arrivalTime: "08:45", via: "Via Dwaraka" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "08:10", arrivalTime: "08:55", via: "Via Dwaraka" },
+  // ✏️ ADD MORE Mananthavady → College BUSES HERE
+  // { route: "mananthavady-college", busType: "Private", departureTime: "08:30", arrivalTime: "09:15", via: "Via Dwaraka" },
+
+  /* ---------- College → Mananthavady ---------- */
+  { route: "college-mananthavady", busType: "KSRTC",   departureTime: "13:10", arrivalTime: "13:55", via: "Via Dwaraka" },
+  { route: "college-mananthavady", busType: "Private", departureTime: "15:30", arrivalTime: "16:15", via: "Via Dwaraka" },
+  { route: "college-mananthavady", busType: "KSRTC",   departureTime: "16:00", arrivalTime: "16:45", via: "Via Dwaraka" },
+  { route: "college-mananthavady", busType: "Private", departureTime: "16:30", arrivalTime: "17:15", via: "Via Dwaraka" },
+  // ✏️ ADD MORE College → Mananthavady BUSES HERE
+
+  /* ---------- Kattikulam → College ---------- */
+  { route: "kattikulam-college", busType: "KSRTC",   departureTime: "07:00", arrivalTime: "07:50", via: "Via Thirunelly Road" },
+  { route: "kattikulam-college", busType: "Private", departureTime: "07:40", arrivalTime: "08:30", via: "Via Thirunelly Road" },
+  { route: "kattikulam-college", busType: "KSRTC",   departureTime: "08:05", arrivalTime: "08:55", via: "Via Thirunelly Road" },
+  // ✏️ ADD MORE Kattikulam → College BUSES HERE
+
+  /* ---------- College → Kattikulam ---------- */
+  { route: "college-kattikulam", busType: "Private", departureTime: "15:40", arrivalTime: "16:30", via: "Via Thirunelly Road" },
+  { route: "college-kattikulam", busType: "KSRTC",   departureTime: "16:20", arrivalTime: "17:10", via: "Via Thirunelly Road" },
+  // ✏️ ADD MORE College → Kattikulam BUSES HERE
+];
+
+/* ============================================================
+   LOGIC — you normally don't need to touch anything below.
+   ============================================================ */
+
+let currentRoute = null; // which route details page is open
+
+// --- time helpers -------------------------------------------
+function toMinutes(hhmm) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+}
+function nowMinutes() {
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+}
+function to12Hour(hhmm) {
+  let [h, m] = hhmm.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${String(m).padStart(2, "0")} ${ampm}`;
+}
+function sortedBuses(routeId) {
+  return BUSES.filter(b => b.route === routeId)
+              .sort((a, b) => toMinutes(a.departureTime) - toMinutes(b.departureTime));
+}
+// First bus of the day that hasn't departed yet (or null if done for today)
+function nextBus(routeId) {
+  const now = nowMinutes();
+  return sortedBuses(routeId).find(b => toMinutes(b.departureTime) >= now) || null;
+}
+function minutesUntil(bus) {
+  return toMinutes(bus.departureTime) - nowMinutes();
+}
+function routeName(routeId) {
+  const r = ROUTES.find(r => r.id === routeId);
+  return r ? r.name : routeId;
+}
+
+// --- favorites (saved in the browser via localStorage) -------
+function getFavs() {
+  try { return JSON.parse(localStorage.getItem("nextbus-favs")) || []; }
+  catch { return []; }
+}
+function saveFavs(favs) {
+  localStorage.setItem("nextbus-favs", JSON.stringify(favs));
+}
+function toggleFav(routeId) {
+  let favs = getFavs();
+  favs = favs.includes(routeId) ? favs.filter(f => f !== routeId) : [...favs, routeId];
+  saveFavs(favs);
+  renderFavToggle();
+  renderFavorites();
+}
+
+// --- page switching ------------------------------------------
+function showPage(page) {
+  ["home", "route", "favorites", "about"].forEach(p => {
+    document.getElementById("page-" + p).classList.toggle("hidden", p !== page);
+  });
+  ["home", "favorites", "about"].forEach(p => {
+    document.getElementById("nav-" + p).classList.toggle("active", p === page);
+  });
+  window.scrollTo(0, 0);
+}
+function openRoute(routeId) {
+  currentRoute = routeId;
+  document.getElementById("route-title").textContent = routeName(routeId);
+  renderFavToggle();
+  renderBusList();
+  showPage("route");
+}
+
+// --- rendering -----------------------------------------------
+function renderRouteCards() {
+  document.getElementById("route-list").innerHTML = ROUTES.map(r => `
+    <button class="clay route-card" onclick="openRoute('${r.id}')">
+      <span>${r.name}</span><span class="arrow">›</span>
+    </button>`).join("");
+}
+
+// The home Next Bus widget: earliest upcoming bus across ALL routes
+function renderNextWidget() {
+  const upcoming = ROUTES.map(r => nextBus(r.id)).filter(Boolean)
+    .sort((a, b) => toMinutes(a.departureTime) - toMinutes(b.departureTime))[0];
+  const el = document.getElementById("next-widget");
+  if (!upcoming) {
+    el.innerHTML = `<div class="label">Next Bus</div>
+      <div class="detail" style="margin-top:8px">No more buses today. 🌙<br>See you tomorrow!</div>`;
+    return;
+  }
+  const mins = minutesUntil(upcoming);
+  el.innerHTML = `
+    <div class="label">Next Bus</div>
+    <div class="big-time">${to12Hour(upcoming.departureTime)}</div>
+    <div class="detail">
+      ${upcoming.busType} Bus · ${routeName(upcoming.route)}<br>
+      Arrives: ${to12Hour(upcoming.arrivalTime)}
+    </div>
+    <div class="countdown">${mins === 0 ? "Departing now!" : `Departs in ${mins} min`}</div>`;
+}
+
+function renderBusList() {
+  const buses = sortedBuses(currentRoute);
+  const next = nextBus(currentRoute);
+  const now = nowMinutes();
+  document.getElementById("bus-list").innerHTML = buses.map(b => {
+    const isNext = next && b === next;
+    const departed = toMinutes(b.departureTime) < now;
+    return `
+    <div class="clay bus-card ${b.busType.toLowerCase()} ${isNext ? "next" : ""}">
+      ${isNext ? `<span class="badge">NEXT BUS</span>` : ""}
+      <div class="${departed ? "departed" : ""}">
+        <div class="dep-time">${to12Hour(b.departureTime)}</div>
+        <div class="bus-type">${b.busType} Bus</div>
+        <div class="arrival">
+          Arrives: ${to12Hour(b.arrivalTime)} · ${b.via}
+          ${isNext ? ` · in ${minutesUntil(b)} min` : ""}
+          ${departed ? " · Departed" : ""}
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderFavToggle() {
+  const btn = document.getElementById("fav-toggle");
+  btn.textContent = getFavs().includes(currentRoute)
+    ? "★ Remove from Favorites" : "⭐ Add to Favorites";
+  btn.onclick = () => toggleFav(currentRoute);
+}
+
+function renderFavorites() {
+  const favs = getFavs();
+  const el = document.getElementById("fav-list");
+  if (!favs.length) {
+    el.innerHTML = `<div class="empty-msg">No favorites yet.<br>
+      Open a route and tap ⭐ Add to Favorites.</div>`;
+    return;
+  }
+  el.innerHTML = favs.map(id => {
+    const nb = nextBus(id);
+    return `
+    <button class="clay route-card" onclick="openRoute('${id}')">
+      <span>⭐ ${routeName(id)}<br>
+        <small style="color:var(--text-muted);font-weight:500">
+          ${nb ? `Next: ${to12Hour(nb.departureTime)} (${nb.busType})` : "No more buses today"}
+        </small>
+      </span><span class="arrow">›</span>
+    </button>`;
+  }).join("");
+}
+
+// --- start up ------------------------------------------------
+function renderAll() {
+  renderRouteCards();
+  renderNextWidget();
+  renderFavorites();
+  if (currentRoute) renderBusList();
+}
+renderAll();
+// Refresh countdowns every 30 seconds so "Departs in X min" stays live
+setInterval(renderAll, 30000);
+</script>
+</body>
+</html>
