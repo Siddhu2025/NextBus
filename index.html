@@ -6,6 +6,19 @@
 <title>NextBus MMC — College Bus Timings</title>
 
 <!-- ============================================================
+     FONTS & ICONS (loaded from Google Fonts — needs internet)
+     ✏️ EDIT HERE: to change the font, replace "Plus Jakarta Sans"
+     in the link below AND in the --font variable in the CSS.
+     Browse fonts at https://fonts.google.com
+     Icons come from Material Symbols; find more icon names at
+     https://fonts.google.com/icons  (e.g. "home", "star", "info")
+     ============================================================ -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,1,0" rel="stylesheet" />
+
+<!-- ============================================================
      NextBus MMC
      Mobile-first bus timetable for Mary Matha College students.
 
@@ -26,6 +39,8 @@
      ✏️ EDIT HERE: change site-wide colors in one place.
      ========================================================== */
   :root {
+    --font: "Plus Jakarta Sans", system-ui, sans-serif;  /* ✏️ custom font */
+
     --bg: #ffffff;              /* page background (white) */
     --text: #1e293b;            /* main text color */
     --text-muted: #64748b;      /* secondary/grey text */
@@ -38,7 +53,12 @@
     --private-bg: #dcfce7;      /* 🟢 Private card background (green) */
     --private-border: #86efac;
 
-    --next-border: #facc15;     /* 🟡 yellow border = next upcoming bus */
+    --next-border: #fadd03;     /* 🟡 yellow border = next upcoming bus */
+
+    /* ✏️ EDIT HERE: gradient for the Next Bus widget (two blues).
+       Change these two colors to change the gradient. */
+    --gradient-start: #2563eb;
+    --gradient-end: #4f46e5;
 
     --radius: 22px;             /* rounded corner size for cards */
 
@@ -52,7 +72,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font);
     background: var(--bg);
     color: var(--text);
     /* space at the bottom so content never hides behind the nav bar */
@@ -76,6 +96,22 @@
     font-size: 0.8rem;
     color: var(--text-muted);
     margin-top: 4px;
+  }
+
+  /* ==========================================================
+     2b. MATERIAL SYMBOLS ICONS
+     Usage: <span class="msr">home</span> renders the "home" icon.
+     Find more icon names at https://fonts.google.com/icons
+     ========================================================== */
+  .msr {
+    font-family: "Material Symbols Rounded";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1.3em;
+    line-height: 1;
+    display: inline-block;
+    vertical-align: -0.22em;
+    -webkit-font-smoothing: antialiased;
   }
 
   /* ==========================================================
@@ -121,12 +157,15 @@
     padding: 20px;
     margin-bottom: 20px;
     border: 3px solid var(--next-border);
+    /* gradient background — colors defined in :root at the top */
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: #ffffff;
   }
   .next-widget .label {
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 1px;
-    color: var(--accent);
+    color: #fde047;              /* yellow label pops on the gradient */
     text-transform: uppercase;
   }
   .next-widget .big-time {
@@ -135,15 +174,15 @@
     margin: 6px 0 2px;
   }
   .next-widget .detail {
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.85);
     font-size: 0.9rem;
     line-height: 1.5;
   }
   .next-widget .countdown {
     display: inline-block;
     margin-top: 10px;
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(255, 255, 255, 0.2);  /* frosted pill on gradient */
+    color: #ffffff;
     font-weight: 700;
     padding: 6px 14px;
     border-radius: 999px;
@@ -280,7 +319,7 @@
        HEADER
        ========================================================== -->
   <header>
-    <h1>🚌 College Bus Timings</h1>
+    <h1><span class="msr" style="color:var(--accent)">directions_bus</span> College Bus Timings</h1>
     <!-- "Last updated" = the date YOU last edited the timetable.
          ✏️ EDIT HERE: change this text whenever you update bus data. -->
     <div class="updated">Timetable updated: July 2026</div>
@@ -315,7 +354,7 @@
        PAGE: FAVORITES
        ========================================================== -->
   <main id="page-favorites" class="page hidden">
-    <h2>⭐ Favorites</h2>
+    <h2><span class="msr" style="color:#eab308">star</span> Favorites</h2>
     <div id="fav-list"></div>
   </main>
 
@@ -329,7 +368,7 @@
       <p><strong>NextBus MMC</strong></p>
       <p>Created for students of<br />
          Mary Matha Arts &amp; Science College</p>
-      <p>Made with ❤️ by students</p>
+      <p>Made with <span class="msr" style="color:#ef4444">favorite</span> by students</p>
       <!-- ✏️ EDIT HERE: add contributor names, contact info,
            or a feedback link. Example:
            <p>Contact: yourname@email.com</p>
@@ -342,13 +381,13 @@
        ========================================================== -->
   <nav>
     <button id="nav-home" class="active" onclick="showPage('home')">
-      <span class="icon">🏠</span>Home
+      <span class="icon msr">home</span>Home
     </button>
     <button id="nav-favorites" onclick="showPage('favorites')">
-      <span class="icon">⭐</span>Favorites
+      <span class="icon msr">star</span>Favorites
     </button>
     <button id="nav-about" onclick="showPage('about')">
-      <span class="icon">ℹ️</span>About
+      <span class="icon msr">info</span>About
     </button>
   </nav>
 
@@ -370,45 +409,90 @@ const ROUTES = [
 ];
 
 /* ============================================================
+   TRAVEL TIME
+   ✏️ EDIT HERE: how many minutes the journey takes, per route.
+   Arrival times are calculated automatically from this, so you
+   only ever need to type departure times below.
+   ============================================================ */
+const TRAVEL_MINUTES = {
+  "mananthavady-college": 15,
+  "college-mananthavady": 15,
+  "kattikulam-college":   15,
+  "college-kattikulam":   15,
+  // ✏️ If you add a new route above, add its travel time here too.
+};
+
+/* ============================================================
    BUS TIMETABLE  —  THE MAIN THING YOU WILL EDIT ✏️
    ------------------------------------------------------------
    Each bus is one line:
      route:         must match a route id from ROUTES above
      busType:       "KSRTC" (blue) or "Private" (green)
      departureTime: 24-hour format "HH:MM"  (e.g. "14:30" = 2:30 PM)
-     arrivalTime:   24-hour format "HH:MM"
-     via:           the route the bus takes (shown on the card)
 
-   Buses are sorted by time automatically — you can add new
-   lines anywhere in the list, order doesn't matter.
+   Arrival time is calculated automatically (departure + travel
+   time). Buses are sorted by time automatically — you can add
+   new lines anywhere in the list, order doesn't matter.
    ============================================================ */
 const BUSES = [
   /* ---------- Mananthavady → College ---------- */
-  { route: "mananthavady-college", busType: "KSRTC",   departureTime: "06:45", arrivalTime: "07:30", via: "Via Dwaraka" },
-  { route: "mananthavady-college", busType: "Private", departureTime: "07:15", arrivalTime: "08:00", via: "Via Dwaraka" },
-  { route: "mananthavady-college", busType: "KSRTC",   departureTime: "07:30", arrivalTime: "08:15", via: "Via Dwaraka" },
-  { route: "mananthavady-college", busType: "Private", departureTime: "07:45", arrivalTime: "08:30", via: "Via Dwaraka" },
-  { route: "mananthavady-college", busType: "KSRTC",   departureTime: "08:00", arrivalTime: "08:45", via: "Via Dwaraka" },
-  { route: "mananthavady-college", busType: "Private", departureTime: "08:10", arrivalTime: "08:55", via: "Via Dwaraka" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "08:15" },//Ave maria
+  { route: "mananthavady-college", busType: "Private", departureTime: "08:20" },//Sreehari
+  { route: "mananthavady-college", busType: "Private", departureTime: "08:25" },//Ammus
+  { route: "mananthavady-college", busType: "Private", departureTime: "08:35" },//Prince
+  { route: "mananthavady-college", busType: "Private", departureTime: "08:45" },/*Malarvadi*/
+  { route: "mananthavady-college", busType: "Private", departureTime: "08:55" },//KGT
+  { route: "mananthavady-college", busType: "KSRTC",   departureTime: "09:10" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "09:15" },//Nandhanam
+  { route: "mananthavady-college", busType: "Private", departureTime: "09:25" },//DIYA
+  { route: "mananthavady-college", busType: "Private", departureTime: "09:32" },//keybeeteee
+  { route: "mananthavady-college", busType: "KSRTC",   departureTime: "09:40" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "13:55" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "14:05" },
   // ✏️ ADD MORE Mananthavady → College BUSES HERE
-  // { route: "mananthavady-college", busType: "Private", departureTime: "08:30", arrivalTime: "09:15", via: "Via Dwaraka" },
+  // { route: "mananthavady-college", busType: "Private", departureTime: "08:30" },
 
   /* ---------- College → Mananthavady ---------- */
-  { route: "college-mananthavady", busType: "KSRTC",   departureTime: "13:10", arrivalTime: "13:55", via: "Via Dwaraka" },
-  { route: "college-mananthavady", busType: "Private", departureTime: "15:30", arrivalTime: "16:15", via: "Via Dwaraka" },
-  { route: "college-mananthavady", busType: "KSRTC",   departureTime: "16:00", arrivalTime: "16:45", via: "Via Dwaraka" },
-  { route: "college-mananthavady", busType: "Private", departureTime: "16:30", arrivalTime: "17:15", via: "Via Dwaraka" },
+  { route: "college-mananthavady", busType: "Private", departureTime: "09:55" },
+  { route: "college-mananthavady", busType: "Private", departureTime: "12:00" },//KGT
+  { route: "college-mananthavady", busType: "Private", departureTime: "13:05" },
+  { route: "college-mananthavady", busType: "KSRTC",   departureTime: "15:45" },
+  { route: "college-mananthavady", busType: "Private", departureTime: "15:50" },//Malarvadi
+  { route: "college-mananthavady", busType: "KSRTC", departureTime: "16:00" },
+  { route: "college-mananthavady", busType: "Private",   departureTime: "16:05" },//St martin
+  { route: "college-mananthavady", busType: "Private", departureTime: "16:05" },//keybeetee
   // ✏️ ADD MORE College → Mananthavady BUSES HERE
 
   /* ---------- Kattikulam → College ---------- */
-  { route: "kattikulam-college", busType: "KSRTC",   departureTime: "07:00", arrivalTime: "07:50", via: "Via Thirunelly Road" },
-  { route: "kattikulam-college", busType: "Private", departureTime: "07:40", arrivalTime: "08:30", via: "Via Thirunelly Road" },
-  { route: "kattikulam-college", busType: "KSRTC",   departureTime: "08:05", arrivalTime: "08:55", via: "Via Thirunelly Road" },
+  { route: "kattikulam-college", busType: "KSRTC",   departureTime: "07:00" },
+  { route: "kattikulam-college", busType: "Private",   departureTime: "09:40" },
+  { route: "kattikulam-college", busType: "Private", departureTime: "12:55" },
+  { route: "kattikulam-college", busType: "Private", departureTime: "15:50" },
+  { route: "kattikulam-college", busType: "Private", departureTime: "15:35" },
+  { route: "kattikulam-college", busType: "Private", departureTime: "15:50" },
+
+
+
   // ✏️ ADD MORE Kattikulam → College BUSES HERE
 
   /* ---------- College → Kattikulam ---------- */
-  { route: "college-kattikulam", busType: "Private", departureTime: "15:40", arrivalTime: "16:30", via: "Via Thirunelly Road" },
-  { route: "college-kattikulam", busType: "KSRTC",   departureTime: "16:20", arrivalTime: "17:10", via: "Via Thirunelly Road" },
+  { route: "college-kattikulam", busType: "Private", departureTime: "08:30" },//Ave Maria
+  { route: "college-kattikulam", busType: "Private", departureTime: "08:35" },//Sreehari
+  { route: "college-kattikulam", busType: "Private", departureTime: "08:40" },//Ammus
+  { route: "college-kattikulam", busType: "Private", departureTime: "08:50" },//prince
+  { route: "college-kattikulam", busType: "Private", departureTime: "09:00" },//malarvadi
+  { route: "college-kattikulam", busType: "Private", departureTime: "09:15" },//kgt
+  { route: "college-kattikulam", busType: "KSRTC",   departureTime: "09:25" },//9-10 KSRTC
+  { route: "college-kattikulam", busType: "Private", departureTime: "09:30" },//Nandhanam
+  { route: "college-kattikulam", busType: "Private", departureTime: "09:40" },//DIYA
+  { route: "college-kattikulam", busType: "Private", departureTime: "09:55" },//KEYBEETEE
+  { route: "college-kattikulam", busType: "KSRTC",   departureTime: "09:55" },//9-40 KSRTC
+  
+  { route: "college-kattikulam", busType: "Private", departureTime: "13:00" },
+  { route: "college-kattikulam", busType: "KSRTC",   departureTime: "13:05" },
+  { route: "college-kattikulam", busType: "Private", departureTime: "13:10" },
+  { route: "college-kattikulam", busType: "Private", departureTime: "14:20" },
+
   // ✏️ ADD MORE College → Kattikulam BUSES HERE
 ];
 
@@ -432,6 +516,13 @@ function to12Hour(hhmm) {
   const ampm = h >= 12 ? "PM" : "AM";
   h = h % 12 || 12;
   return `${h}:${String(m).padStart(2, "0")} ${ampm}`;
+}
+// Arrival time = departure time + the route's travel time
+function arrivalTime(bus) {
+  const total = toMinutes(bus.departureTime) + (TRAVEL_MINUTES[bus.route] || 0);
+  const h = Math.floor(total / 60) % 24;
+  const m = total % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 function sortedBuses(routeId) {
   return BUSES.filter(b => b.route === routeId)
@@ -499,7 +590,8 @@ function renderNextWidget() {
   const el = document.getElementById("next-widget");
   if (!upcoming) {
     el.innerHTML = `<div class="label">Next Bus</div>
-      <div class="detail" style="margin-top:8px">No more buses today. 🌙<br>See you tomorrow!</div>`;
+      <div class="detail" style="margin-top:8px">
+        <span class="msr">bedtime</span> No more buses today.<br>See you tomorrow!</div>`;
     return;
   }
   const mins = minutesUntil(upcoming);
@@ -508,7 +600,7 @@ function renderNextWidget() {
     <div class="big-time">${to12Hour(upcoming.departureTime)}</div>
     <div class="detail">
       ${upcoming.busType} Bus · ${routeName(upcoming.route)}<br>
-      Arrives: ${to12Hour(upcoming.arrivalTime)}
+      Arrives: ${to12Hour(arrivalTime(upcoming))}
     </div>
     <div class="countdown">${mins === 0 ? "Departing now!" : `Departs in ${mins} min`}</div>`;
 }
@@ -527,7 +619,7 @@ function renderBusList() {
         <div class="dep-time">${to12Hour(b.departureTime)}</div>
         <div class="bus-type">${b.busType} Bus</div>
         <div class="arrival">
-          Arrives: ${to12Hour(b.arrivalTime)} · ${b.via}
+          Arrives: ${to12Hour(arrivalTime(b))}
           ${isNext ? ` · in ${minutesUntil(b)} min` : ""}
           ${departed ? " · Departed" : ""}
         </div>
@@ -538,8 +630,9 @@ function renderBusList() {
 
 function renderFavToggle() {
   const btn = document.getElementById("fav-toggle");
-  btn.textContent = getFavs().includes(currentRoute)
-    ? "★ Remove from Favorites" : "⭐ Add to Favorites";
+  btn.innerHTML = getFavs().includes(currentRoute)
+    ? `<span class="msr">star</span> Remove from Favorites`
+    : `<span class="msr">star_outline</span> Add to Favorites`;
   btn.onclick = () => toggleFav(currentRoute);
 }
 
@@ -548,14 +641,14 @@ function renderFavorites() {
   const el = document.getElementById("fav-list");
   if (!favs.length) {
     el.innerHTML = `<div class="empty-msg">No favorites yet.<br>
-      Open a route and tap ⭐ Add to Favorites.</div>`;
+      Open a route and tap <span class="msr">star_outline</span> Add to Favorites.</div>`;
     return;
   }
   el.innerHTML = favs.map(id => {
     const nb = nextBus(id);
     return `
     <button class="clay route-card" onclick="openRoute('${id}')">
-      <span>⭐ ${routeName(id)}<br>
+      <span><span class="msr" style="color:#eab308">star</span> ${routeName(id)}<br>
         <small style="color:var(--text-muted);font-weight:500">
           ${nb ? `Next: ${to12Hour(nb.departureTime)} (${nb.busType})` : "No more buses today"}
         </small>
