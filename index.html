@@ -436,6 +436,8 @@ const TRAVEL_MINUTES = {
    ============================================================ */
 const BUSES = [
   /* ---------- Mananthavady → College ---------- */
+
+  //MORNING PEAK TIME
   { route: "mananthavady-college", busType: "Private", departureTime: "08:15" },//Ave maria
   { route: "mananthavady-college", busType: "Private", departureTime: "08:20" },//Sreehari
   { route: "mananthavady-college", busType: "Private", departureTime: "08:25" },//Ammus
@@ -447,15 +449,32 @@ const BUSES = [
   { route: "mananthavady-college", busType: "Private", departureTime: "09:25" },//DIYA
   { route: "mananthavady-college", busType: "Private", departureTime: "09:32" },//keybeeteee
   { route: "mananthavady-college", busType: "KSRTC",   departureTime: "09:40" },
+
+  
+  { route: "mananthavady-college", busType: "Private", departureTime: "11:00" },//DIYA
+
+
   { route: "mananthavady-college", busType: "Private", departureTime: "13:55" },
   { route: "mananthavady-college", busType: "Private", departureTime: "14:05" },
+  { route: "mananthavady-college", busType: "KSRTC", departureTime: "15:40" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "16:00" },//MALARVADI
+  { route: "mananthavady-college", busType: "KSRTC", departureTime: "16:00" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "16:30" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "17:05" },
+
+
   // ✏️ ADD MORE Mananthavady → College BUSES HERE
   // { route: "mananthavady-college", busType: "Private", departureTime: "08:30" },
 
   /* ---------- College → Mananthavady ---------- */
+  { route: "college-mananthavady", busType: "Private", departureTime: "09:40" },
   { route: "college-mananthavady", busType: "Private", departureTime: "09:55" },
+
+  { route: "college-mananthavady", busType: "Private", departureTime: "11:15" },//prince
   { route: "college-mananthavady", busType: "Private", departureTime: "12:00" },//KGT
   { route: "college-mananthavady", busType: "Private", departureTime: "13:05" },
+
+  //EVENING PEAK TIME
   { route: "college-mananthavady", busType: "KSRTC",   departureTime: "15:45" },
   { route: "college-mananthavady", busType: "Private", departureTime: "15:50" },//Malarvadi
   { route: "college-mananthavady", busType: "KSRTC", departureTime: "16:00" },
@@ -487,11 +506,15 @@ const BUSES = [
   { route: "college-kattikulam", busType: "Private", departureTime: "09:40" },//DIYA
   { route: "college-kattikulam", busType: "Private", departureTime: "09:55" },//KEYBEETEE
   { route: "college-kattikulam", busType: "KSRTC",   departureTime: "09:55" },//9-40 KSRTC
+
+  { route: "college-kattikulam", busType: "Private",   departureTime: "11:10" },//Diya
   
   { route: "college-kattikulam", busType: "Private", departureTime: "13:00" },
   { route: "college-kattikulam", busType: "KSRTC",   departureTime: "13:05" },
   { route: "college-kattikulam", busType: "Private", departureTime: "13:10" },
   { route: "college-kattikulam", busType: "Private", departureTime: "14:20" },
+  { route: "college-kattikulam", busType: "KSRTC", departureTime: "15:50" },
+  { route: "college-kattikulam", busType: "Private", departureTime: "17:15" },
 
   // ✏️ ADD MORE College → Kattikulam BUSES HERE
 ];
