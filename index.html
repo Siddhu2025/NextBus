@@ -17,6 +17,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet" />
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,1,0" rel="stylesheet" />
+<link rel="icon" type="image/png" href="next-bus-logo.png" />
+<link rel="apple-touch-icon" href="next-bus-logo.png" />
 
 <!-- ============================================================
      NextBus MMC
@@ -151,34 +153,56 @@
   .route-card:active { transform: scale(0.98); }
 
   /* ==========================================================
-     5. HOME — NEXT BUS WIDGET
+     5. HOME — NEXT BUS WIDGET (sliding cards, 1 per route)
      ========================================================== */
-  .next-widget {
-    padding: 20px;
+  .next-widget-wrapper {
+    position: relative;
     margin-bottom: 20px;
+    padding: 0;
+    overflow: hidden;
     border: 3px solid var(--next-border);
+  }
+  /* horizontally scrollable, swipeable track — 1 slide per route */
+  .next-widget-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;         /* hide scrollbar on Firefox */
+  }
+  .next-widget-track::-webkit-scrollbar { display: none; } /* hide on Chrome/Safari */
+
+  .next-widget-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    box-sizing: border-box;
+    min-height: 150px;
+    padding: 20px 20px 40px;     /* extra bottom padding keeps text clear of the dots */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;      /* centers content so short slides don't leave a gap */
     /* gradient background — colors defined in :root at the top */
     background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
     color: #ffffff;
   }
-  .next-widget .label {
+  .next-widget-slide .label {
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 1px;
     color: #fde047;              /* yellow label pops on the gradient */
     text-transform: uppercase;
   }
-  .next-widget .big-time {
+  .next-widget-slide .big-time {
     font-size: 2.2rem;
     font-weight: 800;
     margin: 6px 0 2px;
   }
-  .next-widget .detail {
+  .next-widget-slide .detail {
     color: rgba(255, 255, 255, 0.85);
     font-size: 0.9rem;
     line-height: 1.5;
   }
-  .next-widget .countdown {
+  .next-widget-slide .countdown {
     display: inline-block;
     margin-top: 10px;
     background: rgba(255, 255, 255, 0.2);  /* frosted pill on gradient */
@@ -187,6 +211,31 @@
     padding: 6px 14px;
     border-radius: 999px;
     font-size: 0.9rem;
+  }
+  /* dot indicators overlaid on the gradient itself — no separate white strip */
+  .next-widget-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.18);   /* subtle pill so dots stay visible on any gradient */
+  }
+  .next-widget-dots .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+    transition: width 0.2s, background 0.2s;
+  }
+  .next-widget-dots .dot.active {
+    width: 18px;
+    background: #ffffff;
   }
 
   /* ==========================================================
@@ -252,7 +301,11 @@
     padding: 4px 12px;
     border-radius: 999px;
   }
-  .bus-card .departed { opacity: 0.55; }
+  /* Buses that have already left: greyed out, pushed to the bottom of the list */
+  .bus-card.departed-card {
+    opacity: 0.55;
+    filter: grayscale(1);
+  }
 
   .fav-btn {
     width: 100%;
@@ -278,6 +331,75 @@
     padding: 28px 20px;
     text-align: center;
     line-height: 1.8;
+  }
+
+  /* ==========================================================
+     7b. ADD TIME — user-suggested bus time form
+     ========================================================== */
+  .addtime-card { padding: 20px; }
+  .form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin: 16px 0 6px;
+  }
+  .form-label:first-child { margin-top: 0; }
+  .form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: var(--accent-soft);
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  select.form-input { appearance: none; -webkit-appearance: none; }
+  .radio-row { display: flex; gap: 10px; }
+  .radio-pill {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: var(--accent-soft);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .radio-pill input { accent-color: var(--accent); }
+  .submit-btn {
+    width: 100%;
+    margin-top: 22px;
+    padding: 14px;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 800;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #ffffff;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  }
+  .form-status {
+    margin-top: 12px;
+    min-height: 1.2em;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .form-status.ok  { color: #15803d; }
+  .form-status.err { color: #b91c1c; }
+  .form-note {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--text-muted);
   }
 
   /* ==========================================================
@@ -329,8 +451,11 @@
        PAGE: HOME
        ========================================================== -->
   <main id="page-home" class="page">
-    <!-- Next Bus widget — filled automatically by JavaScript -->
-    <div id="next-widget" class="clay next-widget"></div>
+    <!-- Next Bus widget — a sliding card per route, filled automatically by JavaScript -->
+    <div class="clay next-widget-wrapper">
+      <div id="next-widget-track" class="next-widget-track"></div>
+      <div id="next-widget-dots" class="next-widget-dots"></div>
+    </div>
 
     <h2>Select Route</h2>
     <!-- Route cards are generated automatically from the ROUTES
@@ -368,11 +493,48 @@
       <p><strong>NextBus MMC</strong></p>
       <p>Created for students of<br />
          Mary Matha Arts &amp; Science College</p>
-      <p>Made with <span class="msr" style="color:#ef4444">favorite</span> by students</p>
+
       <!-- ✏️ EDIT HERE: add contributor names, contact info,
-           or a feedback link. Example:
+           a feedback link, credits, etc. Example:
            <p>Contact: yourname@email.com</p>
       -->
+
+    </div>
+    <button class="clay fav-btn" onclick="showPage('addtime')">
+      <span class="msr">post_add</span> Add Time
+    </button>
+  </main>
+
+  <!-- ==========================================================
+       PAGE: ADD TIME — let people suggest a bus time they know.
+       Submissions are sent to a Google Sheet for you to review.
+       ========================================================== -->
+  <main id="page-addtime" class="page hidden">
+    <button class="back-btn" onclick="showPage('about')">← Back</button>
+    <h2><span class="msr">post_add</span> Suggest a Bus Time</h2>
+    <div class="clay addtime-card">
+      <form id="addtime-form">
+        <label class="form-label" for="at-route">Route</label>
+        <select id="at-route" class="form-input"></select>
+
+        <label class="form-label" id="at-time-label" for="at-time">Time</label>
+        <input type="time" id="at-time" class="form-input" required />
+
+        <label class="form-label">Bus Type</label>
+        <div class="radio-row">
+          <label class="radio-pill">
+            <input type="radio" name="at-bustype" value="KSRTC" required /> KSRTC
+          </label>
+          <label class="radio-pill">
+            <input type="radio" name="at-bustype" value="Private" /> Private
+          </label>
+        </div>
+
+        <button type="submit" class="submit-btn">Submit Suggestion</button>
+        <div id="at-status" class="form-status"></div>
+      </form>
+      <p class="form-note">Suggestions are reviewed before being added to the
+        timetable — they won't show up right away.</p>
     </div>
   </main>
 
@@ -449,6 +611,7 @@ const BUSES = [
   { route: "mananthavady-college", busType: "Private", departureTime: "09:25" },//DIYA
   { route: "mananthavady-college", busType: "Private", departureTime: "09:32" },//keybeeteee
   { route: "mananthavady-college", busType: "KSRTC",   departureTime: "09:40" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "09:45" },//malhar
 
   
   { route: "mananthavady-college", busType: "Private", departureTime: "11:00" },//DIYA
@@ -459,8 +622,9 @@ const BUSES = [
   { route: "mananthavady-college", busType: "KSRTC", departureTime: "15:40" },
   { route: "mananthavady-college", busType: "Private", departureTime: "16:00" },//MALARVADI
   { route: "mananthavady-college", busType: "KSRTC", departureTime: "16:00" },
-  { route: "mananthavady-college", busType: "Private", departureTime: "16:30" },
-  { route: "mananthavady-college", busType: "Private", departureTime: "17:05" },
+  { route: "mananthavady-college", busType: "Private", departureTime: "16:30" },//malhar
+  { route: "mananthavady-college", busType: "Private", departureTime: "17:00" },//malhar
+  { route: "mananthavady-college", busType: "Private", departureTime: "17:05" },//kgt
 
 
   // ✏️ ADD MORE Mananthavady → College BUSES HERE
@@ -480,16 +644,19 @@ const BUSES = [
   { route: "college-mananthavady", busType: "KSRTC", departureTime: "16:00" },
   { route: "college-mananthavady", busType: "Private",   departureTime: "16:05" },//St martin
   { route: "college-mananthavady", busType: "Private", departureTime: "16:05" },//keybeetee
+  { route: "college-mananthavady", busType: "Private", departureTime: "16:35" },//ammus
+  { route: "college-mananthavady", busType: "KSRTC", departureTime: "17:15" },
   // ✏️ ADD MORE College → Mananthavady BUSES HERE
 
   /* ---------- Kattikulam → College ---------- */
+  //MORNING PEAK TIME
   { route: "kattikulam-college", busType: "KSRTC",   departureTime: "07:00" },
   { route: "kattikulam-college", busType: "Private",   departureTime: "09:40" },
   { route: "kattikulam-college", busType: "Private", departureTime: "12:55" },
   { route: "kattikulam-college", busType: "Private", departureTime: "15:50" },
   { route: "kattikulam-college", busType: "Private", departureTime: "15:35" },
   { route: "kattikulam-college", busType: "Private", departureTime: "15:50" },
-
+  { route: "kattikulam-college", busType: "Private", departureTime: "16:20" },
 
 
   // ✏️ ADD MORE Kattikulam → College BUSES HERE
@@ -513,8 +680,11 @@ const BUSES = [
   { route: "college-kattikulam", busType: "KSRTC",   departureTime: "13:05" },
   { route: "college-kattikulam", busType: "Private", departureTime: "13:10" },
   { route: "college-kattikulam", busType: "Private", departureTime: "14:20" },
+
+  //EVENING PEAK TIME
   { route: "college-kattikulam", busType: "KSRTC", departureTime: "15:50" },
-  { route: "college-kattikulam", busType: "Private", departureTime: "17:15" },
+  { route: "college-kattikulam", busType: "Private", departureTime: "17:10" },//malhar
+  { route: "college-kattikulam", busType: "Private", departureTime: "17:15" },//kgt
 
   // ✏️ ADD MORE College → Kattikulam BUSES HERE
 ];
@@ -582,7 +752,7 @@ function toggleFav(routeId) {
 
 // --- page switching ------------------------------------------
 function showPage(page) {
-  ["home", "route", "favorites", "about"].forEach(p => {
+  ["home", "route", "favorites", "about", "addtime"].forEach(p => {
     document.getElementById("page-" + p).classList.toggle("hidden", p !== page);
   });
   ["home", "favorites", "about"].forEach(p => {
@@ -606,45 +776,83 @@ function renderRouteCards() {
     </button>`).join("");
 }
 
-// The home Next Bus widget: earliest upcoming bus across ALL routes
+// The home Next Bus widget: one sliding card per route, each showing
+// that route's next upcoming bus. Swipe or tap the dots to move between them.
 function renderNextWidget() {
-  const upcoming = ROUTES.map(r => nextBus(r.id)).filter(Boolean)
-    .sort((a, b) => toMinutes(a.departureTime) - toMinutes(b.departureTime))[0];
-  const el = document.getElementById("next-widget");
-  if (!upcoming) {
-    el.innerHTML = `<div class="label">Next Bus</div>
-      <div class="detail" style="margin-top:8px">
-        <span class="msr">bedtime</span> No more buses today.<br>See you tomorrow!</div>`;
-    return;
+  const track = document.getElementById("next-widget-track");
+  const dots = document.getElementById("next-widget-dots");
+  const prevScroll = track.scrollLeft; // keep the user's current slide across auto-refresh
+
+  track.innerHTML = ROUTES.map(r => {
+    const upcoming = nextBus(r.id);
+    if (!upcoming) {
+      return `
+      <div class="next-widget-slide">
+        <div class="label">${r.name}</div>
+        <div class="detail" style="margin-top:10px">
+          <span class="msr">bedtime</span> No more buses today.<br>See you tomorrow!
+        </div>
+      </div>`;
+    }
+    const mins = minutesUntil(upcoming);
+    return `
+    <div class="next-widget-slide">
+      <div class="label">${r.name}</div>
+      <div class="big-time">${to12Hour(upcoming.departureTime)}</div>
+      <div class="detail">
+        ${upcoming.busType} Bus<br>
+        Arrives: ${to12Hour(arrivalTime(upcoming))}
+      </div>
+      <div class="countdown">${mins === 0 ? "Departing now!" : `Departs in ${mins} min`}</div>
+    </div>`;
+  }).join("");
+
+  dots.innerHTML = ROUTES.map((r, i) =>
+    `<span class="dot${i === 0 ? " active" : ""}" data-index="${i}"></span>`
+  ).join("");
+
+  track.scrollLeft = prevScroll; // restore slide position after re-render
+
+  // Wire up swipe → dot sync and dot → slide jump, once
+  if (!track.dataset.bound) {
+    track.dataset.bound = "1";
+    track.addEventListener("scroll", () => {
+      const idx = Math.round(track.scrollLeft / track.clientWidth);
+      dots.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === idx));
+    });
+    dots.addEventListener("click", (e) => {
+      const dot = e.target.closest(".dot");
+      if (!dot) return;
+      const idx = Number(dot.dataset.index);
+      track.scrollTo({ left: idx * track.clientWidth, behavior: "smooth" });
+    });
   }
-  const mins = minutesUntil(upcoming);
-  el.innerHTML = `
-    <div class="label">Next Bus</div>
-    <div class="big-time">${to12Hour(upcoming.departureTime)}</div>
-    <div class="detail">
-      ${upcoming.busType} Bus · ${routeName(upcoming.route)}<br>
-      Arrives: ${to12Hour(arrivalTime(upcoming))}
-    </div>
-    <div class="countdown">${mins === 0 ? "Departing now!" : `Departs in ${mins} min`}</div>`;
 }
 
 function renderBusList() {
   const buses = sortedBuses(currentRoute);
   const next = nextBus(currentRoute);
   const now = nowMinutes();
-  document.getElementById("bus-list").innerHTML = buses.map(b => {
+
+  // Upcoming buses (next bus first, since sortedBuses is ascending) stay on top.
+  // Already-departed buses drop to the bottom, greyed out.
+  const upcoming = buses.filter(b => toMinutes(b.departureTime) >= now);
+  const departed = buses.filter(b => toMinutes(b.departureTime) < now);
+  const ordered = [...upcoming, ...departed];
+
+  document.getElementById("bus-list").innerHTML = ordered.map(b => {
     const isNext = next && b === next;
-    const departed = toMinutes(b.departureTime) < now;
+    const isDeparted = toMinutes(b.departureTime) < now;
     return `
-    <div class="clay bus-card ${b.busType.toLowerCase()} ${isNext ? "next" : ""}">
+    <div class="clay bus-card ${b.busType.toLowerCase()} ${isNext ? "next" : ""} ${isDeparted ? "departed-card" : ""}">
       ${isNext ? `<span class="badge">NEXT BUS</span>` : ""}
-      <div class="${departed ? "departed" : ""}">
+      <div>
         <div class="dep-time">${to12Hour(b.departureTime)}</div>
         <div class="bus-type">${b.busType} Bus</div>
         <div class="arrival">
           Arrives: ${to12Hour(arrivalTime(b))}
           ${isNext ? ` · in ${minutesUntil(b)} min` : ""}
-          ${departed ? " · Departed" : ""}
+          ${isDeparted ? " · Departed" : ""}
         </div>
       </div>
     </div>`;
@@ -680,6 +888,91 @@ function renderFavorites() {
   }).join("");
 }
 
+/* ============================================================
+   ADD TIME — lets students suggest a bus time they know.
+   Submissions are POSTed to a Google Sheet (via a Google Apps
+   Script "Web App") so you can review them before adding them
+   to the BUSES list above.
+   ✏️ EDIT HERE: paste your Google Apps Script Web App URL below.
+   (Ask Claude, or see the setup steps it gave you, if you
+   haven't created one yet.)
+   ============================================================ */
+const SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyVjfd8sP3-5HEF0OWq36etdQ5HPR_5XUypBcwVoLG3CMFa2JE-1TwLr_CfLvqbHBEb/exec";
+
+// The first stop named in a route, e.g. "College → Mananthavady" -> "College"
+function routeFirstPlace(routeId) {
+  const r = ROUTES.find(r => r.id === routeId);
+  return r ? r.name.split("→")[0].trim() : "";
+}
+
+function renderAddTimeRouteOptions() {
+  const sel = document.getElementById("at-route");
+  sel.innerHTML = ROUTES.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
+  updateAddTimeLabel();
+}
+// Updates the time field's label to match whichever route is selected
+function updateAddTimeLabel() {
+  const routeId = document.getElementById("at-route").value;
+  document.getElementById("at-time-label").textContent =
+    `What time does the bus leave ${routeFirstPlace(routeId)}?`;
+}
+
+function initAddTimeForm() {
+  renderAddTimeRouteOptions();
+  document.getElementById("at-route").addEventListener("change", updateAddTimeLabel);
+  document.getElementById("addtime-form").addEventListener("submit", handleAddTimeSubmit);
+}
+
+async function handleAddTimeSubmit(e) {
+  e.preventDefault();
+  const status = document.getElementById("at-status");
+  const routeId = document.getElementById("at-route").value;
+  const time = document.getElementById("at-time").value;
+  const busTypeInput = document.querySelector('input[name="at-bustype"]:checked');
+
+  if (!time || !busTypeInput) {
+    status.textContent = "Please fill in every field.";
+    status.className = "form-status err";
+    return;
+  }
+
+  if (!SHEET_WEBAPP_URL || SHEET_WEBAPP_URL.startsWith("PASTE_")) {
+    status.textContent = "⚠️ Not connected to a sheet yet — ask the site owner.";
+    status.className = "form-status err";
+    return;
+  }
+
+  const payload = {
+    route: routeId,
+    routeName: routeName(routeId),
+    busType: busTypeInput.value,
+    departureTime: time,
+    submittedAt: new Date().toISOString(),
+  };
+
+  status.textContent = "Sending…";
+  status.className = "form-status";
+
+  try {
+    // Google Apps Script web apps don't send back CORS headers, so we use
+    // mode:"no-cors" — the POST still reaches the sheet, we just can't read
+    // a response back. No thrown network error is treated as success.
+    await fetch(SHEET_WEBAPP_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(payload).toString(),
+    });
+    status.textContent = "✅ Thanks! Your suggestion was sent for review.";
+    status.className = "form-status ok";
+    e.target.reset();
+    updateAddTimeLabel();
+  } catch (err) {
+    status.textContent = "⚠️ Couldn't send — check your connection and try again.";
+    status.className = "form-status err";
+  }
+}
+
 // --- start up ------------------------------------------------
 function renderAll() {
   renderRouteCards();
@@ -688,6 +981,7 @@ function renderAll() {
   if (currentRoute) renderBusList();
 }
 renderAll();
+initAddTimeForm(); // set up the Add Time form once — not on every refresh
 // Refresh countdowns every 30 seconds so "Departs in X min" stays live
 setInterval(renderAll, 30000);
 </script>
